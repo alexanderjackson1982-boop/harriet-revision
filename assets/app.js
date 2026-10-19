@@ -3,7 +3,7 @@
 
 const KEY = "harriet-mocks-site-v1";
 const MOCKS = new Date(2026, 10, 9); // 9 November 2026
-const blank = () => ({ ticks: {}, rag: {}, notes: {}, missed: {}, best: {}, log: [], qs: [], cards: [], studyLog: {}, attempts: {}, retry: {}, perf: {}, skills: [], drafts: {}, qcheck: {} });
+const blank = () => ({ ticks: {}, rag: {}, notes: {}, missed: {}, best: {}, log: [], qs: [], cards: [], studyLog: {}, attempts: {}, retry: {}, perf: {}, skills: [], drafts: {}, qcheck: {}, ai: {} });
 /* Make any saved or restored data safe to use: keep what's valid, fill in anything missing. */
 function normalise(raw) {
   const out = blank();
@@ -40,6 +40,7 @@ function summary() {
     learning: (() => { const f = Object.values(st.attempts).flat(); const r = Object.values(st.attempts).filter(a => a.length > 1); return { attempted: f.length, marks: f.reduce((n, a) => n + a.score, 0), max: f.reduce((n, a) => n + a.max, 0), improved: r.filter(a => a[a.length - 1].score > a[0].score).length, retried: r.length, toRetry: Object.keys(st.retry).length }; })(),
     coverage: coverage().filter(c => c.done).map(c => `${c.title}: ${c.done}/${c.total}`),
     errorTypes: errorTypeCounts().filter(e => e.n).map(e => `${e.name}: ${e.n}`),
+    aiMarked: Object.values(st.ai).reduce((n, a) => n + a.length, 0),
     flash: { total: st.cards.length, made: st.cards.filter(c => !c.pack).length, reviewedToday: (st.studyLog || {})[todayISO()] || 0, mastered: st.cards.filter(c => c.box >= 4).length } };
 }
 function sync() {
@@ -705,6 +706,104 @@ function qtypeStep(q) {
   return box;
 }
 
+/* ---------- AI MARKING (optional, off unless switched on in the email script) ---------- */
+const AI_CODE_KEY = "harriet-mocks-ai-code"; // kept apart from progress, so it never goes into backups or emails
+let AI_ON = false;
+const AI_TYPES = { knowledge: ["Knowledge", "knowledge"], understanding: ["Understanding", "explain"], application: ["Application", "apply"], analysis: ["Analysis", "analysis"], technique: ["Exam technique", "command"] };
+const AI_ERRORS = {
+  code: "That access code isn't right. Ask your dad for it.",
+  daily_limit: "You've used today's AI marking. Use the marking guidance instead, and try again tomorrow.",
+  total_limit: "AI marking has reached its limit for this revision period. The marking guidance still works.",
+  too_long: "That answer is too long for AI marking. Trim it and try again.",
+  empty: "Write an answer first.",
+  off: "AI marking is switched off at the moment. Use the marking guidance below."
+};
+function checkAi() {
+  if (!SYNC_URL) return;
+  fetch(SYNC_URL + "?status=1").then(r => r.json()).then(j => { AI_ON = !!(j && j.ai === true); document.querySelectorAll(".aislot").forEach(sl => { const q = EXAMQ.find(x => x.id === sl.dataset.q); if (q) fillAiSlot(sl, q, document.getElementById(`xq-in-${q.id}`)); }); }).catch(() => {});
+}
+function aiContext(q) {
+  if (q.source) return q.source;
+  if (q.table && TABLES[q.table]) { const t = TABLES[q.table]; return `${t.title}\n${t.head.join(" | ")}\n${t.rows.map(r => r.join(" | ")).join("\n")}`; }
+  if (q.graph && GRAPHS[q.graph]) { const g = GRAPHS[q.graph]; return `${g.title}. ${g.x} against ${g.y}. Points: ${g.pts.map(p => `(${p[0]}, ${p[1]})`).join(", ")}`; }
+  return "";
+}
+function fillAiSlot(slot, q, input) {
+  slot.innerHTML = "";
+  if (!AI_ON || !input) return;
+  const out = el("div", { class: "aifb", "aria-live": "polite" });
+  const codeRow = el("div", { class: "aicode", hidden: true });
+  const codeIn = el("input", { type: "password", id: `aicode-${q.id}`, autocomplete: "off", placeholder: "Access code", "aria-label": "AI marking access code" });
+  codeRow.append(el("label", { for: `aicode-${q.id}`, class: "small" }, "Enter the access code once. It's saved on this device only."), codeIn,
+    el("button", { type: "button", class: "btn ghost", onclick: () => { const v = codeIn.value.trim(); if (!v) return; try { localStorage.setItem(AI_CODE_KEY, v); } catch (e) {} codeRow.hidden = true; go(); } }, "Save and mark"));
+  const btn = el("button", { type: "button", class: "btn ai", onclick: () => go() }, (st.ai[q.id] || []).length ? "Mark my improved answer with AI" : "Mark my answer with AI");
+  slot.append(el("div", { class: "airow" }, btn, el("span", { class: "small" }, "Optional. AI feedback is an estimate to help you improve, not an official mark.")), codeRow, out);
+  function go() {
+    const answer = input.value.trim();
+    if (!answer) { toast("Write your answer first."); input.focus(); return; }
+    let code = ""; try { code = localStorage.getItem(AI_CODE_KEY) || ""; } catch (e) {}
+    if (!code) { codeRow.hidden = false; codeIn.focus(); return; }
+    const hist = st.ai[q.id] || [], last = hist[hist.length - 1];
+    if (last && last.answer === answer) { toast("Change your answer first, then mark it again."); input.focus(); return; }
+    const payload = { subject: SUBJECTS[q.subj].name, topic: q.topic, cmd: q.cmd, marks: q.marks, question: q.q, context: aiContext(q), guidance: q.guide, answer,
+      previous: last ? { answer: last.answer } : null };
+    btn.disabled = true; out.replaceChildren(el("p", { class: "small" }, "Reading your answer…"));
+    const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = setTimeout(() => ctl && ctl.abort(), 45000);
+    fetch(SYNC_URL, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ key: SYNC_KEY, action: "mark", code, payload }), signal: ctl ? ctl.signal : undefined })
+      .then(r => r.json()).then(res => {
+        if (!res || !res.ok) {
+          const e = res && res.error;
+          if (e === "code") { try { localStorage.removeItem(AI_CODE_KEY); } catch (x) {} codeRow.hidden = false; }
+          if (e === "off") AI_ON = false;
+          out.replaceChildren(el("p", { class: "mcqfb no" }, AI_ERRORS[e] || "AI marking isn't available right now. Your answer is safe. Use the marking guidance below."));
+          return;
+        }
+        const fb = res.feedback;
+        const entry = { d: todayISO(), answer, mark: fb.mark, max: fb.max, markable: fb.markable, conf: fb.confidence, et: fb.error_types, accepted: [], rejected: [] };
+        (st.ai[q.id] = hist).push(entry); if (hist.length > 6) hist.splice(0, hist.length - 6);
+        save(); renderProgress();
+        btn.textContent = "Mark my improved answer with AI";
+        out.replaceChildren(aiFeedbackCard(q, fb, entry, input));
+      })
+      .catch(() => out.replaceChildren(el("p", { class: "mcqfb no" }, "AI marking isn't available right now. Your answer is safe. Use the marking guidance below.")))
+      .finally(() => { clearTimeout(timer); btn.disabled = false; });
+  }
+}
+function aiFeedbackCard(q, fb, entry, input) {
+  const list = (title, items, cls) => items && items.length ? el("div", { class: `aisec ${cls || ""}` }, el("b", {}, title), el("ul", {}, items.map(t => el("li", {}, t)))) : null;
+  const card = el("div", { class: "aicard" });
+  card.append(el("div", { class: "aihead" }, el("span", { class: "aitag" }, "AI feedback"),
+    fb.markable && fb.mark != null ? el("strong", {}, `Indicative mark: ${fb.mark} / ${fb.max}`) : el("strong", {}, "Feedback only (no reliable mark for this one)"),
+    el("small", {}, ` AI estimate · ${fb.confidence} confidence`)));
+  if (fb.compare) card.append(el("div", { class: "aisec compare" }, el("b", {}, fb.compare.better === "yes" ? "Compared with last time: this is stronger" : fb.compare.better === "no" ? "Compared with last time: not stronger yet" : "Compared with last time: about the same"),
+    fb.compare.improved.length ? el("ul", {}, fb.compare.improved.map(t => el("li", {}, "Better: " + t))) : null,
+    fb.compare.remaining.length ? el("ul", {}, fb.compare.remaining.map(t => el("li", {}, "Still to do: " + t))) : null));
+  card.append(...[list("What you did well", fb.strengths, "good"), list("What is missing", fb.missing, "miss"), list("How to improve", fb.improve, "imp")].filter(Boolean));
+  if (fb.criteria.length) card.append(el("details", { class: "aicrit" }, el("summary", {}, "Marking points the AI checked"),
+    el("ul", {}, fb.criteria.map(c => el("li", { class: `met-${c.met}` }, `${c.met === "yes" ? "✓" : c.met === "partly" ? "◐" : "✗"} ${c.point}`)))));
+  // AI-suggested weaknesses: Harriet decides
+  if (fb.error_types.length) {
+    const box = el("div", { class: "aisec types" }, el("b", {}, "The AI thinks you may have lost marks on:"), el("p", { class: "small" }, "Do you agree? Only the ones you agree with go into your mistake log."));
+    fb.error_types.forEach(t => {
+      const row = el("div", { class: "airow" }, el("span", {}, AI_TYPES[t][0]));
+      const yes = el("button", { type: "button", class: "linkbtn", onclick: () => {
+        entry.accepted.push(t); st.log = st.log.filter(r => r.d || r.s || r.w);
+        st.log.unshift({ d: todayShort(), s: q.subj, w: `${q.cmd} (${q.marks}): ${q.q.slice(0, 80)}${q.q.length > 80 ? "…" : ""} AI-suggested, I agreed: ${AI_TYPES[t][0].toLowerCase()}.`, r: AI_TYPES[t][1], f: false, qid: q.id, src: "ai" });
+        save(); renderLog(); renderProgress(); row.replaceChildren(el("span", { class: "small" }, `${AI_TYPES[t][0]}: added to your mistake log.`)); } }, "Yes, add it");
+      const no = el("button", { type: "button", class: "linkbtn", onclick: () => { entry.rejected.push(t); save(); row.replaceChildren(el("span", { class: "small" }, `${AI_TYPES[t][0]}: ignored.`)); } }, "No");
+      row.append(yes, no); box.append(row);
+    });
+    card.append(box);
+  }
+  const mdl = el("p", { class: "womodel", hidden: true }, el("b", {}, "Model answer: "), q.model);
+  card.append(el("div", { class: "row-actions" },
+    el("button", { type: "button", class: "btn", onclick: () => { input.focus(); input.scrollIntoView({ behavior: "smooth", block: "center" }); } }, "Try again: improve my answer"),
+    el("button", { type: "button", class: "btn ghost", onclick: e => { mdl.hidden = false; e.target.remove(); } }, "Show me a model answer")), mdl,
+    el("p", { class: "small" }, "AI can be wrong. If something doesn't match your notes or your teacher, trust them. You can still self-mark with the guidance below."));
+  return card;
+}
+
 /* ---------- EXAM QUESTION (self-marked against guidance) ---------- */
 function examQBlock(q) {
   const wrap = el("article", { class: "xq", id: `xq-${q.id}`, style: `--c:${col(q.subj)}` });
@@ -737,6 +836,7 @@ function examQBlock(q) {
     check.hidden = true; panel.hidden = false; buildGuide();
   } }, "Check against the marking guidance");
   wrap.append(check, panel);
+  if (!q.num) { const slot = el("div", { class: "aislot", "data-q": q.id }); wrap.insertBefore(slot, check); fillAiSlot(slot, q, input); }
 
   function buildGuide() {
     panel.innerHTML = "";
@@ -1015,7 +1115,8 @@ function renderProgress() {
     tile(String(flat.length), "exam questions attempted"),
     tile(max ? `${got} / ${max}` : "–", "marks achieved", max ? `${Math.round(got / max * 100)}% of available marks` : "Self-marked"),
     tile(String(improved), "improved on a retry", retried.length ? `out of ${retried.length} retried` : null),
-    tile(String(fixed), "mistakes marked fixed"));
+    tile(String(fixed), "mistakes marked fixed"),
+    ...(Object.keys(st.ai).length ? [tile(String(Object.values(st.ai).reduce((n, a) => n + a.length, 0)), "answers given AI feedback", "AI estimates: not counted in your marks")] : []));
 
   // English skills
   const sk = st.skills;
@@ -1139,7 +1240,7 @@ function renderAll() {
   renderQuizGrid(); renderFilter(); renderTracker(); renderQuestions(); renderLog(); renderFlash(); renderFocus(); renderPractise(); renderProgress();
 }
 
-renderAll(); renderLinks(); wireBackup(); wireFlash(); route();
+renderAll(); renderLinks(); wireBackup(); wireFlash(); route(); checkAi();
 window.addEventListener("hashchange", route);
 document.querySelector('[data-tab="quiz"]').addEventListener("click", () => { if (!$("#module").hidden) closeModule(); });
 })();

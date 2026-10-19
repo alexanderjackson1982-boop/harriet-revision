@@ -467,3 +467,21 @@ small.block{display:block;opacity:.75;font-weight:400}
 .sumlist{margin:.3rem 0 .6rem 1.1rem;padding:0}
 .sumlist li{margin:.3rem 0}
 @media (max-width:560px){.covrow{grid-template-columns:1fr auto}.covrow .skbar{grid-column:1/-1;grid-row:2}}
+
+/* ===== Stage 3: AI feedback ===== */
+.aislot:empty{display:none}
+.airow{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.btn.ai{background:var(--surface);color:var(--accent);border:2px solid var(--accent)}
+.aicode{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.aicode input{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+.aicard{margin-top:10px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.aihead{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}
+.aitag{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:var(--accent);color:#fff;border-radius:99px;padding:2px 8px}
+.aihead small{color:var(--muted)}
+.aisec ul{margin:.3rem 0 0 1.1rem;padding:0}
+.aisec li{margin:.2rem 0}
+.aisec.good b{color:var(--good)}
+.aisec.compare{background:rgba(127,127,127,.08);border-radius:8px;padding:8px 10px}
+.aicrit summary{cursor:pointer;font-size:.9rem}
+.aicrit ul{list-style:none;margin:.4rem 0 0;padding:0;font-size:.9rem}
+.met-yes{color:var(--good)} .met-no{color:var(--muted)}
