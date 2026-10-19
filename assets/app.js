@@ -3,7 +3,7 @@
 
 const KEY = "harriet-mocks-site-v1";
 const MOCKS = new Date(2026, 10, 9); // 9 November 2026
-const blank = () => ({ ticks: {}, rag: {}, notes: {}, missed: {}, best: {}, log: [], qs: [] });
+const blank = () => ({ ticks: {}, rag: {}, notes: {}, missed: {}, best: {}, log: [], qs: [], cards: [], studyLog: {} });
 let st = blank();
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && typeof s === "object") st = Object.assign(blank(), s); } catch (e) {}
 /* Daily email: paste the Apps Script web app URL between the quotes to switch it on */
@@ -24,7 +24,8 @@ function summary() {
   const quizzes = {}; Object.entries(st.best).forEach(([s, v]) => { quizzes[SUBJECTS[s] ? SUBJECTS[s].name : s] = `${v.score} / ${v.total}`; });
   return { key: SYNC_KEY, done, total, days, red: rated("r"), amber: rated("a"), quizzes,
     mistakesOpen: st.log.filter(r => (r.w || "").trim() && !r.f).length,
-    questions: st.qs.filter(q => (q.t || "").trim() && !q.done).map(q => q.t) };
+    questions: st.qs.filter(q => (q.t || "").trim() && !q.done).map(q => q.t),
+    flash: { total: st.cards.length, made: st.cards.filter(c => !c.pack).length, reviewedToday: (st.studyLog || {})[todayISO()] || 0, mastered: st.cards.filter(c => c.box >= 4).length } };
 }
 function sync() {
   try { fetch(SYNC_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(summary()) }).catch(() => {}); } catch (e) {}
@@ -270,6 +271,7 @@ function finishQuiz() {
       el("ul", { class: "reviewlist" }, missed.map(q => el("li", {}, el("b", {}, q.t + ": "), `${q.q} Answer: ${q.a[q.c]}`))));
   }
   box.append(el("div", { class: "row-actions" },
+    missed.length ? el("button", { type: "button", class: "btn ghost", onclick: e => { missed.forEach(q => addCard(s, q.q, `${q.a[q.c]}. ${q.why}`, { fromQuiz: true })); save(); renderFlash(); e.currentTarget.disabled = true; e.currentTarget.textContent = "Added to flashcards"; } }, `Make ${missed.length} flashcard${missed.length > 1 ? "s" : ""} from my mistakes`) : null,
     el("button", { type: "button", class: "btn", onclick: () => startQuiz(s) }, "Try again"),
     el("button", { type: "button", class: "btn ghost", onclick: () => { box.hidden = true; renderQuizGrid(); window.scrollTo({ top: 0, behavior: "smooth" }); } }, "Pick another subject")));
   renderQuizGrid(); renderTracker(); renderLog();
@@ -376,8 +378,149 @@ function wireBackup() {
   $("#add-log").onclick = () => { st.log.push({ d: todayShort(), s: "", w: "", f: false }); save(); renderLog(); document.getElementById(`log-w-${st.log.length - 1}`).focus(); };
 }
 
+/* ---------- FLASHCARDS ---------- */
+const GAPS = [0, 1, 2, 4, 7, 14]; // days until a card comes back, by box
+const addDays = n => { const d = new Date(); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+let deck = "all", study = null, editing = null;
+const isDue = c => !c.due || c.due <= todayISO();
+const inDeck = c => deck === "all" || c.s === deck;
+
+function addCard(s, f, b, extra = {}) {
+  st.cards.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), s, f: f.trim(), b: b.trim(), box: 0, due: todayISO(), ...extra });
+}
+
+function renderFlash() {
+  const cards = st.cards;
+  const due = cards.filter(c => inDeck(c) && isDue(c)).length;
+  const inThis = cards.filter(inDeck).length;
+  const today = (st.studyLog || {})[todayISO()] || 0;
+  $("#fc-stats").replaceChildren(
+    el("span", {}, el("b", {}, String(cards.length)), " cards"),
+    el("span", {}, el("b", {}, String(cards.filter(isDue).length)), " due today"),
+    el("span", {}, el("b", {}, String(today)), " reviewed today"));
+  const decks = $("#fc-decks"); decks.innerHTML = "";
+  [["all", "All subjects"], ...Object.entries(SUBJECTS).map(([k, v]) => [k, v.name])].forEach(([k, name]) => {
+    const n = k === "all" ? cards.length : cards.filter(c => c.s === k).length;
+    decks.append(el("button", { type: "button", "aria-pressed": String(deck === k), style: k === "all" ? "" : `--c:${col(k)}`, onclick: () => { deck = k; renderFlash(); } }, name, el("small", {}, String(n))));
+  });
+  $("#fc-study").textContent = due ? `Study ${due} due card${due > 1 ? "s" : ""}` : "Nothing due. Well done.";
+  $("#fc-study").disabled = !due;
+  $("#fc-cram").disabled = !inThis;
+  const sel = $("#fc-subject"); if (!sel.options.length) Object.entries(SUBJECTS).forEach(([k, v]) => sel.append(el("option", { value: k }, v.name)));
+  if (deck !== "all") sel.value = deck;
+  // starter packs
+  const packs = $("#fc-packs"); packs.innerHTML = "";
+  Object.entries(STARTERS).forEach(([k, p]) => {
+    const s = p.subject || k;
+    if (deck !== "all" && deck !== s) return;
+    const added = cards.some(c => c.pack === k);
+    packs.append(el("button", { type: "button", class: "pack", style: `--c:${col(s)}`, disabled: added,
+      onclick: () => { p.cards.forEach(([f, b]) => addCard(s, f, b, { pack: k })); save(); renderFlash(); toast(`Added ${p.cards.length} cards: ${p.name}`); } },
+      el("strong", {}, p.name), el("span", {}, added ? "Added" : `${p.cards.length} cards · tap to add`)));
+  });
+  // card list
+  const list = $("#fc-list"); list.innerHTML = "";
+  const shown = cards.filter(inDeck).slice().reverse();
+  if (!shown.length) list.append(el("p", { class: "small" }, "No cards here yet. Make one above, or add a starter pack."));
+  shown.forEach(c => {
+    if (editing === c.id) {
+      const f = el("textarea", { id: `ed-f-${c.id}`, rows: 2, "aria-label": "Front" }, c.f);
+      const b = el("textarea", { id: `ed-b-${c.id}`, rows: 2, "aria-label": "Back" }, c.b);
+      list.append(el("div", { class: "fcrow editing", style: `--c:${col(c.s)}` }, f, b,
+        el("div", { class: "row-actions" },
+          el("button", { type: "button", class: "btn", onclick: () => { if (f.value.trim() && b.value.trim()) { c.f = f.value.trim(); c.b = b.value.trim(); } editing = null; save(); renderFlash(); } }, "Save"),
+          el("button", { type: "button", class: "btn ghost", onclick: () => { editing = null; renderFlash(); } }, "Cancel"))));
+      return;
+    }
+    const level = ["New", "Learning", "Learning", "Getting there", "Strong", "Mastered"][Math.min(c.box, 5)];
+    list.append(el("div", { class: "fcrow", style: `--c:${col(c.s)}` },
+      el("div", { class: "fcq" }, el("b", {}, c.f), el("span", {}, c.b)),
+      el("div", { class: "fcmeta" }, el("span", { class: "lvl" }, level),
+        el("button", { type: "button", class: "del", "aria-label": "Edit card", title: "Edit", onclick: () => { editing = c.id; renderFlash(); } }, "✎"),
+        el("button", { type: "button", class: "del", "aria-label": "Delete card", title: "Delete", onclick: () => { st.cards = st.cards.filter(x => x.id !== c.id); save(); renderFlash(); } }, "×"))));
+  });
+}
+
+function toast(msg) {
+  let t = $("#toast"); if (!t) { t = el("div", { id: "toast", role: "status" }); document.body.append(t); }
+  t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+function startStudy(all) {
+  const pool = st.cards.filter(c => inDeck(c) && (all || isDue(c)));
+  if (!pool.length) return;
+  study = { queue: shuffle(pool).map(c => c.id), done: 0, right: 0, total: pool.length, flipped: false, cram: all };
+  $("#fc-home").hidden = true; $("#fc-session").hidden = false;
+  showCard();
+}
+
+function showCard() {
+  const box = $("#fc-session"); box.innerHTML = "";
+  if (!study.queue.length) {
+    box.append(el("div", { class: "label" }, "Session complete"),
+      el("div", { class: "score", style: "color:var(--accent)" }, `${study.right} / ${study.total}`),
+      el("p", { class: "lead" }, study.right === study.total ? "You knew every card first time." : "Cards you didn't know will come back sooner."),
+      el("div", { class: "row-actions" }, el("button", { type: "button", class: "btn", onclick: endStudy }, "Back to my cards")));
+    return;
+  }
+  const c = st.cards.find(x => x.id === study.queue[0]);
+  if (!c) { study.queue.shift(); return showCard(); }
+  study.flipped = false;
+  const card = el("button", { type: "button", class: "flip", style: `--c:${col(c.s)}`, "aria-label": "Flip card" },
+    el("span", { class: "face front" }, el("small", {}, SUBJECTS[c.s].name), el("span", { class: "ftext" }, c.f), el("em", {}, "Tap to flip")),
+    el("span", { class: "face back" }, el("small", {}, "Answer"), el("span", { class: "ftext" }, c.b)));
+  const actions = el("div", { class: "judge", hidden: true },
+    el("button", { type: "button", class: "btn no", onclick: () => judge(c, false) }, "Not yet"),
+    el("button", { type: "button", class: "btn yes", onclick: () => judge(c, true) }, "Knew it"));
+  const flip = () => { study.flipped = !study.flipped; card.classList.toggle("on", study.flipped); if (study.flipped) actions.hidden = false; };
+  card.addEventListener("click", flip);
+  box.append(el("div", { class: "qhead" }, el("div", { class: "label" }, study.cram ? "Practising every card" : "Due cards"),
+      el("div", { class: "qprog" }, `${study.queue.length} left · ${study.right} known`)),
+    card, actions,
+    el("button", { type: "button", class: "linkbtn", onclick: endStudy }, "Stop and go back"));
+  box.onkeydown = null;
+  card.focus();
+}
+
+function judge(c, knew) {
+  const id = study.queue.shift();
+  st.studyLog = st.studyLog || {}; st.studyLog[todayISO()] = (st.studyLog[todayISO()] || 0) + 1;
+  if (knew) {
+    if (!c._missed) study.right++;
+    c.box = Math.min((c.box || 0) + 1, 5); c.due = addDays(GAPS[c.box]);
+  } else {
+    c.box = 1; c.due = todayISO(); c._missed = true;
+    study.queue.push(id); // see it again this session
+  }
+  save(); showCard();
+}
+
+function endStudy() {
+  st.cards.forEach(c => delete c._missed); save();
+  study = null; $("#fc-session").hidden = true; $("#fc-home").hidden = false; renderFlash();
+}
+
+function wireFlash() {
+  $("#fc-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const f = $("#fc-front"), b = $("#fc-back");
+    if (!f.value.trim() || !b.value.trim()) { toast("Fill in both sides of the card."); return; }
+    addCard($("#fc-subject").value, f.value, b.value);
+    f.value = ""; b.value = ""; save(); renderFlash(); toast("Card added."); f.focus();
+  });
+  $("#fc-study").onclick = () => startStudy(false);
+  $("#fc-cram").onclick = () => startStudy(true);
+  document.addEventListener("keydown", e => {
+    if (!study || $("#fc-session").hidden || /input|textarea/i.test(e.target.tagName)) return;
+    const card = $("#fc-session .flip"); if (!card) return;
+    if (e.key === " " || e.key === "Enter") { if (document.activeElement !== card) { e.preventDefault(); card.click(); } }
+    if (study.flipped && e.key === "1") $("#fc-session .no").click();
+    if (study.flipped && e.key === "2") $("#fc-session .yes").click();
+  });
+}
+
 /* ---------- TABS ---------- */
-const TABS = ["plan", "quiz", "tracker", "links"];
+const TABS = ["plan", "quiz", "cards", "tracker", "links"];
 function route() {
   const h = location.hash.slice(1);
   const tab = TABS.includes(h) ? h : "plan";
@@ -391,9 +534,9 @@ function route() {
 function renderAll() {
   ["#hours", "#strip", "#days"].forEach(s => $(s).innerHTML = "");
   renderHours(); renderStrip(); renderDays(); refresh(); todayLine();
-  renderQuizGrid(); renderFilter(); renderTracker(); renderQuestions(); renderLog();
+  renderQuizGrid(); renderFilter(); renderTracker(); renderQuestions(); renderLog(); renderFlash();
 }
 
-renderAll(); renderLinks(); wireBackup(); route();
+renderAll(); renderLinks(); wireBackup(); wireFlash(); route();
 window.addEventListener("hashchange", route);
 })();
