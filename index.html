@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Harriet's Mock Countdown</title>
+<meta name="description" content="Harriet's GCSE mock revision plan, quizzes and tracker">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <div class="label">GCSE mocks · from 9 November</div>
+      <h1>Harriet's <span>mock</span> countdown</h1>
+      <p id="today-line" class="today-line"></p>
+    </div>
+    <div class="progress" aria-live="polite">
+      <div class="label">Blocks done</div>
+      <div class="num" id="pnum">0</div>
+      <div class="bar"><i id="pbar"></i></div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <a href="#plan" role="tab" data-tab="plan">Plan</a>
+    <a href="#quiz" role="tab" data-tab="quiz">Quizzes</a>
+    <a href="#tracker" role="tab" data-tab="tracker">Where I'm stuck</a>
+    <a href="#links" role="tab" data-tab="links">All links</a>
+  </nav>
+
+  <!-- PLAN -->
+  <main>
+  <section id="tab-plan" class="tab">
+    <div class="strip" id="strip"></div>
+    <div class="legend">
+      <span><i style="background:var(--accent)"></i>Revision day</span>
+      <span><i style="background:var(--good)"></i>Day complete</span>
+      <span><i class="dash"></i>Day off</span>
+      <span><i style="background:var(--away)"></i>Away</span>
+    </div>
+
+    <section class="panel">
+      <div class="label">The plan in brief</div>
+      <h2>What you're doing and why</h2>
+      <p class="lead">Seven days, 21 focused blocks of revision, covering every subject with a written mock. You finish on Sunday 1 November, a week before the science mocks start on 9 November. Two blocks prepare you for English Language Paper 2.</p>
+      <div class="hours" id="hours"></div>
+      <div class="whys">
+        <div class="why"><strong>All of science Paper 1</strong><span>Every Paper 1 topic in Biology, Chemistry and Physics is covered.</span></div>
+        <div class="why"><strong>Three subjects a day</strong><span>Switching keeps you fresh and helps you remember more.</span></div>
+        <div class="why"><strong>Test yourself first</strong><span>Writing from memory makes things stick. Re-reading does little.</span></div>
+        <div class="why"><strong>Learn from mistakes</strong><span>Log what you get wrong. Take it to Thursday's maths session.</span></div>
+        <div class="why"><strong>Quiz yourself</strong><span>Each subject has a 2 minute quiz. Low scores flag topics to fix.</span></div>
+        <div class="why"><strong>Proper rest</strong><span>Weekends and the trip are off. Sunday 1 November is a final top-up.</span></div>
+      </div>
+    </section>
+
+    <section class="panel method">
+      <div class="label">Every block, 50 minutes</div>
+      <h2>Answers on paper, not just reading</h2>
+      <div class="timebar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="steps">
+        <div class="step"><b>10 min</b><strong>Recall</strong><span>Book closed. Write down everything you remember.</span></div>
+        <div class="step"><b>5 min</b><strong>Check</strong><span>Open your notes. Add what you missed in green pen.</span></div>
+        <div class="step"><b>25 min</b><strong>Practise</strong><span>Exam questions, Sparx or worksheets.</span></div>
+        <div class="step"><b>10 min</b><strong>Mark</strong><span>Use the mark scheme. Correct in green pen. Log mistakes.</span></div>
+      </div>
+      <p class="small">10 minute break between blocks. Phone in another room. Finish each day with a quick quiz or 10 minutes of flashcards.</p>
+    </section>
+
+    <div class="days" id="days"></div>
+    <div class="row-actions"><button class="btn ghost" id="print-plan" type="button">Print the plan</button></div>
+  </section>
+
+  <!-- QUIZZES -->
+  <section id="tab-quiz" class="tab" hidden>
+    <section class="panel">
+      <div class="label">Quick quizzes</div>
+      <h2>Two minutes per subject</h2>
+      <p class="lead">Pick a subject. Each answer tells you why. Anything you get wrong goes into your tracker automatically, so you know what to look at again.</p>
+      <div class="quizgrid" id="quizgrid"></div>
+    </section>
+    <section class="panel quizbox" id="quizbox" hidden></section>
+  </section>
+
+  <!-- TRACKER -->
+  <section id="tab-tracker" class="tab" hidden>
+    <section class="panel">
+      <div class="label">Where I'm stuck</div>
+      <h2>Rate every topic</h2>
+      <p class="lead">Tap a colour for each topic. <b class="rag-r">Red</b> means you're stuck, <b class="rag-a">amber</b> means you're getting there, <b class="rag-g">green</b> means you've got it. Add a note to remind yourself what's confusing.</p>
+      <div class="ragsum" id="ragsum"></div>
+      <div class="filter" id="filter"></div>
+    </section>
+    <div id="topics"></div>
+
+    <section class="panel">
+      <div class="label">Questions for my teacher</div>
+      <h2>Ask these in class or on Thursday</h2>
+      <div id="questions"></div>
+      <button class="btn" id="add-q" type="button">Add a question</button>
+    </section>
+
+    <section class="panel">
+      <div class="label">Mistake log</div>
+      <h2>Every wrong answer goes here</h2>
+      <p class="small">Quiz mistakes are added for you. Add your own from past papers and Sparx.</p>
+      <div class="tablewrap">
+        <table class="log">
+          <thead><tr><th>Date</th><th>Subject</th><th>What I got wrong</th><th>Fixed?</th><th></th></tr></thead>
+          <tbody id="logbody"></tbody>
+        </table>
+      </div>
+      <button class="btn" id="add-log" type="button">Add a mistake</button>
+    </section>
+
+    <section class="panel">
+      <div class="label">Keep your work safe</div>
+      <h2>Back up and restore</h2>
+      <p class="small">Your ticks, ratings and notes are saved in this browser only. Download a backup now and then, or to move to another device.</p>
+      <div class="row-actions">
+        <button class="btn" id="export" type="button">Download backup</button>
+        <label class="btn ghost" for="import">Restore from backup</label>
+        <input type="file" id="import" accept="application/json" hidden>
+        <button class="btn ghost" id="reset" type="button">Clear everything</button>
+      </div>
+      <p class="small" id="backup-msg" role="status"></p>
+    </section>
+  </section>
+
+  <!-- LINKS -->
+  <section id="tab-links" class="tab" hidden>
+    <section class="panel">
+      <div class="label">All links</div>
+      <h2>Everything in one place</h2>
+      <p class="lead">Links from the school revision guide, plus a few extra free resources. They open in a new tab.</p>
+    </section>
+    <div class="linkgrid" id="linkgrid"></div>
+  </section>
+  </main>
+
+  <footer class="foot">Made for Harriet · plan runs 20 October to 1 November 2026</footer>
+</div>
+
+<script src="assets/data.js"></script>
+<script src="assets/quizzes.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
