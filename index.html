@@ -29,6 +29,7 @@
   <nav class="tabs" role="tablist" aria-label="Sections">
     <a href="#plan" role="tab" data-tab="plan">Plan</a>
     <a href="#quiz" role="tab" data-tab="quiz">Quizzes</a>
+    <a href="#cards" role="tab" data-tab="cards">Flashcards</a>
     <a href="#tracker" role="tab" data-tab="tracker">Where I'm stuck</a>
     <a href="#links" role="tab" data-tab="links">All links</a>
   </nav>
@@ -85,6 +86,49 @@
       <div class="quizgrid" id="quizgrid"></div>
     </section>
     <section class="panel quizbox" id="quizbox" hidden></section>
+  </section>
+
+  <!-- FLASHCARDS -->
+  <section id="tab-cards" class="tab" hidden>
+    <div id="fc-home" class="tab">
+      <section class="panel">
+        <div class="label">Flashcards</div>
+        <h2>Test yourself, a few minutes at a time</h2>
+        <p class="lead">Make your own cards or add a starter pack. Study the cards that are due: ones you know come back later, ones you don't come back sooner.</p>
+        <div class="fcstats" id="fc-stats"></div>
+        <div class="decks" id="fc-decks"></div>
+        <div class="row-actions">
+          <button class="btn" id="fc-study" type="button">Study due cards</button>
+          <button class="btn ghost" id="fc-cram" type="button">Practise every card</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="label">Make a card</div>
+        <form id="fc-form" class="fcform">
+          <label for="fc-subject">Subject</label>
+          <select id="fc-subject"></select>
+          <label for="fc-front">Front: the question or prompt</label>
+          <textarea id="fc-front" rows="2" placeholder="e.g. What did Jenner use to make his smallpox vaccine?"></textarea>
+          <label for="fc-back">Back: the answer</label>
+          <textarea id="fc-back" rows="2" placeholder="e.g. Cowpox, in 1796"></textarea>
+          <button class="btn" type="submit">Add card</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="label">Starter packs</div>
+        <h2>Ready-made cards</h2>
+        <p class="small">Add a pack, then edit or delete any card to make it your own.</p>
+        <div class="packs" id="fc-packs"></div>
+      </section>
+
+      <section class="panel">
+        <div class="label">My cards</div>
+        <div id="fc-list" class="fclist"></div>
+      </section>
+    </div>
+    <section class="panel fcsession" id="fc-session" hidden></section>
   </section>
 
   <!-- TRACKER -->
@@ -148,6 +192,7 @@
 
 <script src="assets/data.js"></script>
 <script src="assets/quizzes.js"></script>
+<script src="assets/starters.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>

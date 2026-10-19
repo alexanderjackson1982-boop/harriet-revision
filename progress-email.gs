@@ -72,6 +72,7 @@ function sendDailyEmail() {
   const q = Object.entries(d.quizzes || {});
   html += `<h3>Best quiz scores</h3>` + (q.length ? "<ul>" + q.map(([s, v]) => `<li>${esc(s)}: ${v}</li>`).join("") + "</ul>" : "<p style='color:#666'>No quizzes taken yet.</p>");
   html += `<p><b>${d.mistakesOpen || 0}</b> mistakes logged and not yet fixed.</p>`;
+  if (d.flash) html += `<h3>Flashcards</h3><p>${d.flash.reviewedToday || 0} reviewed today · ${d.flash.total || 0} cards in total (${d.flash.made || 0} she made herself) · ${d.flash.mastered || 0} learned well</p>`;
   if ((d.questions || []).length) html += `<h3>Questions she wants to ask a teacher</h3>` + li(d.questions);
   html += `<p style="color:#666;font-size:13px;margin-top:24px">Sent automatically from Harriet's Mock Countdown.</p></div>`;
 
