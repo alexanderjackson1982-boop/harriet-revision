@@ -1,0 +1,112 @@
+/* Quick quizzes. Each question: q = question, a = answers, c = index of the correct answer, why = explanation, t = topic (links to the tracker). */
+
+const QUIZZES = {
+  maths: [
+    { t: "Expanding brackets", q: "Expand 3(2x − 5)", a: ["6x − 5", "6x − 15", "5x − 15", "6x + 15"], c: 1, why: "Multiply both terms by 3: 3 × 2x = 6x and 3 × −5 = −15." },
+    { t: "Expanding brackets", q: "Expand (x + 3)(x − 5)", a: ["x² − 2x − 15", "x² + 2x − 15", "x² − 15", "x² − 8x − 15"], c: 0, why: "x² − 5x + 3x − 15 = x² − 2x − 15." },
+    { t: "Factorising", q: "Factorise x² + 7x + 12", a: ["(x + 6)(x + 2)", "(x + 12)(x + 1)", "(x + 3)(x + 4)", "(x − 3)(x − 4)"], c: 2, why: "You need two numbers that multiply to 12 and add to 7: 3 and 4." },
+    { t: "Solving linear equations", q: "Solve 5x − 7 = 18", a: ["x = 2.2", "x = 5", "x = 11", "x = 25"], c: 1, why: "Add 7 to get 5x = 25, then divide by 5." },
+    { t: "Solving quadratics", q: "Solve x² − 5x + 6 = 0", a: ["x = 2 or x = 3", "x = −2 or x = −3", "x = 1 or x = 6", "x = −1 or x = 6"], c: 0, why: "It factorises to (x − 2)(x − 3) = 0, so x = 2 or x = 3." },
+    { t: "nth term of sequences", q: "What is the nth term of 4, 7, 10, 13, …?", a: ["n + 3", "4n", "3n + 1", "3n + 4"], c: 2, why: "It goes up by 3, so start with 3n. 3 × 1 = 3, and you need 4, so add 1." },
+    { t: "Angles in polygons", q: "What is each interior angle of a regular hexagon?", a: ["60°", "108°", "120°", "135°"], c: 2, why: "Exterior angle = 360 ÷ 6 = 60°. Interior = 180 − 60 = 120°." },
+    { t: "Angles in polygons", q: "The exterior angles of any polygon add up to…", a: ["180°", "360°", "540°", "It depends on the number of sides"], c: 1, why: "Exterior angles of any polygon always total 360°." },
+    { t: "Standard form", q: "Write 0.00056 in standard form", a: ["5.6 × 10⁴", "56 × 10⁻⁵", "5.6 × 10⁻⁴", "0.56 × 10⁻³"], c: 2, why: "The first number must be between 1 and 10. The decimal point moves 4 places, so 10⁻⁴." },
+    { t: "Index laws", q: "Simplify a⁵ × a³", a: ["a¹⁵", "a⁸", "a²", "2a⁸"], c: 1, why: "When you multiply, add the powers: 5 + 3 = 8." },
+    { t: "Percentages and reverse percentages", q: "A coat costs £68 after a 15% discount. What was the original price?", a: ["£78.20", "£57.80", "£80", "£83"], c: 2, why: "£68 is 85% of the original, so 68 ÷ 0.85 = £80." },
+    { t: "Compound interest", q: "£2000 earns 3% compound interest a year. What is it worth after 2 years?", a: ["£2120.00", "£2121.80", "£2060.00", "£2180.00"], c: 1, why: "2000 × 1.03² = £2121.80." }
+  ],
+  bio: [
+    { t: "Animal and plant cells", q: "Which of these is found in plant cells but not animal cells?", a: ["Nucleus", "Cell membrane", "Cell wall", "Mitochondria"], c: 2, why: "Plant cells also have chloroplasts and a permanent vacuole." },
+    { t: "Animal and plant cells", q: "What do prokaryotic cells (bacteria) not have?", a: ["A cell membrane", "A nucleus", "Cytoplasm", "Ribosomes"], c: 1, why: "Their DNA is a single loop in the cytoplasm, often with plasmids." },
+    { t: "Microscopy and magnification", q: "Which equation is correct?", a: ["Magnification = real size ÷ image size", "Magnification = image size × real size", "Magnification = image size ÷ real size", "Magnification = image size − real size"], c: 2, why: "Remember the triangle: image = actual × magnification." },
+    { t: "Diffusion, osmosis, active transport", q: "Osmosis is the movement of…", a: ["Water from a dilute to a concentrated solution through a partially permeable membrane", "Any particle from high to low concentration", "Glucose against a concentration gradient", "Water from a concentrated to a dilute solution"], c: 0, why: "Osmosis is only about water, and it needs a partially permeable membrane." },
+    { t: "Diffusion, osmosis, active transport", q: "Why does active transport need energy?", a: ["It moves particles down a concentration gradient", "It moves particles against a concentration gradient", "It only happens in plants", "It moves water"], c: 1, why: "The energy comes from respiration. Root hair cells use it to take in mineral ions." },
+    { t: "Enzymes and digestion", q: "Which enzyme breaks down starch into sugars?", a: ["Protease", "Lipase", "Amylase", "Bile"], c: 2, why: "Amylase is a carbohydrase. Bile is not an enzyme; it emulsifies fats." },
+    { t: "Heart, blood and lungs", q: "Which blood vessel carries blood away from the heart at high pressure?", a: ["Vein", "Artery", "Capillary", "Valve"], c: 1, why: "Arteries have thick, muscular, elastic walls to cope with high pressure." },
+    { t: "Communicable disease", q: "Measles is caused by a…", a: ["Bacterium", "Virus", "Fungus", "Protist"], c: 1, why: "Salmonella and gonorrhoea are bacterial. Malaria is caused by a protist." },
+    { t: "Vaccines and antibiotics", q: "Why can't antibiotics treat a cold?", a: ["Colds are caused by viruses", "Colds are caused by bacteria", "Antibiotics only work on fungi", "Colds aren't communicable"], c: 0, why: "Antibiotics kill bacteria. They have no effect on viruses." },
+    { t: "Vaccines and antibiotics", q: "A vaccine contains…", a: ["Antibiotics", "Antibodies from another person", "Dead or inactive forms of a pathogen", "White blood cells"], c: 2, why: "It makes white blood cells produce antibodies, so you respond quickly if infected later." },
+    { t: "Photosynthesis", q: "Which is the word equation for photosynthesis?", a: ["Glucose + oxygen → carbon dioxide + water", "Carbon dioxide + water → glucose + oxygen", "Glucose → lactic acid", "Oxygen + water → glucose + carbon dioxide"], c: 1, why: "It is endothermic and needs light energy, absorbed by chlorophyll." },
+    { t: "Respiration", q: "What does anaerobic respiration in human muscles produce?", a: ["Lactic acid", "Ethanol and carbon dioxide", "Oxygen", "Glucose"], c: 0, why: "Yeast and plants produce ethanol and carbon dioxide instead." }
+  ],
+  chem: [
+    { t: "Atomic structure and isotopes", q: "What is the relative charge of a neutron?", a: ["+1", "−1", "0", "+2"], c: 2, why: "Protons +1, electrons −1, neutrons 0." },
+    { t: "Atomic structure and isotopes", q: "Sodium has mass number 23 and atomic number 11. How many neutrons?", a: ["11", "12", "23", "34"], c: 1, why: "Neutrons = mass number − atomic number = 23 − 11." },
+    { t: "Atomic structure and isotopes", q: "Isotopes of an element have different numbers of…", a: ["Protons", "Electrons", "Neutrons", "Shells"], c: 2, why: "Same protons (same element), different neutrons." },
+    { t: "Groups 0, 1 and 7", q: "How does reactivity change going down group 1?", a: ["It increases", "It decreases", "It stays the same", "It increases then decreases"], c: 0, why: "The outer electron is further from the nucleus, so it is lost more easily." },
+    { t: "Groups 0, 1 and 7", q: "How does reactivity change going down group 7?", a: ["It increases", "It decreases", "It stays the same", "Group 7 elements don't react"], c: 1, why: "It gets harder to gain an electron further from the nucleus." },
+    { t: "Groups 0, 1 and 7", q: "Why are noble gases unreactive?", a: ["They are metals", "They have a full outer shell", "They have no electrons", "They are very dense"], c: 1, why: "A stable arrangement of electrons means they don't need to gain, lose or share." },
+    { t: "Ionic and covalent bonding", q: "Ionic bonding happens between…", a: ["Two non-metals", "A metal and a non-metal", "Two metals", "Noble gases"], c: 1, why: "Electrons are transferred from the metal to the non-metal." },
+    { t: "Ionic and covalent bonding", q: "Why does graphite conduct electricity?", a: ["It has delocalised electrons", "It has ions that move", "Each carbon makes 4 bonds", "It is a metal"], c: 0, why: "Each carbon makes only 3 bonds, leaving one delocalised electron." },
+    { t: "Moles and concentration", q: "What is the relative formula mass of CO₂? (C = 12, O = 16)", a: ["28", "44", "32", "60"], c: 1, why: "12 + (2 × 16) = 44." },
+    { t: "Moles and concentration", q: "10 g of salt is dissolved in 0.5 dm³. What is the concentration?", a: ["5 g/dm³", "20 g/dm³", "10.5 g/dm³", "0.05 g/dm³"], c: 1, why: "Concentration = mass ÷ volume = 10 ÷ 0.5." },
+    { t: "Acids, alkalis and salts", q: "Metal + acid →", a: ["Salt + water", "Salt + hydrogen", "Salt + carbon dioxide", "Oxide + water"], c: 1, why: "Test for hydrogen: a lit splint gives a squeaky pop." },
+    { t: "Electrolysis", q: "In electrolysis, where do metal ions go?", a: ["The anode (positive)", "The cathode (negative)", "They stay in the solution", "They become gas"], c: 1, why: "Positive metal ions are attracted to the negative cathode." },
+    { t: "Exothermic and endothermic", q: "In an exothermic reaction, the temperature of the surroundings…", a: ["Goes up", "Goes down", "Stays the same", "Drops then rises"], c: 0, why: "Energy is transferred to the surroundings, for example combustion." }
+  ],
+  phys: [
+    { t: "Energy stores and equations", q: "A 1000 kg car moves at 10 m/s. What is its kinetic energy?", a: ["5000 J", "10 000 J", "50 000 J", "100 000 J"], c: 2, why: "Ek = ½ × m × v² = 0.5 × 1000 × 10² = 50 000 J." },
+    { t: "Energy stores and equations", q: "Which is the equation for gravitational potential energy?", a: ["Ep = mgh", "Ep = ½mv²", "Ep = mc∆θ", "Ep = IR"], c: 0, why: "Mass × gravitational field strength × height." },
+    { t: "Efficiency", q: "A device uses 120 J and gives 30 J of useful energy. What is its efficiency?", a: ["4%", "25%", "75%", "90%"], c: 1, why: "Useful output ÷ total input = 30 ÷ 120 = 0.25 = 25%." },
+    { t: "Energy stores and equations", q: "What is the unit of power?", a: ["Joule", "Newton", "Watt", "Volt"], c: 2, why: "1 watt = 1 joule transferred per second." },
+    { t: "Energy resources", q: "Which of these is a renewable energy resource?", a: ["Coal", "Natural gas", "Nuclear fuel", "Wind"], c: 3, why: "Renewables can be replenished as they are used." },
+    { t: "Circuits and V = IR", q: "A current of 2 A flows through a 6 Ω resistor. What is the potential difference?", a: ["3 V", "8 V", "12 V", "0.33 V"], c: 2, why: "V = I × R = 2 × 6 = 12 V." },
+    { t: "Circuits and V = IR", q: "In a series circuit, the current is…", a: ["Shared between components", "The same everywhere", "Zero", "Biggest at the battery"], c: 1, why: "In parallel circuits the current splits between branches." },
+    { t: "Mains electricity", q: "UK mains electricity is…", a: ["230 V, 50 Hz", "12 V, 50 Hz", "230 V, 60 Hz", "110 V, 60 Hz"], c: 0, why: "It is alternating current (ac)." },
+    { t: "Mains electricity", q: "What colour is the live wire?", a: ["Blue", "Brown", "Green and yellow", "Red"], c: 1, why: "Neutral is blue. Earth is green and yellow." },
+    { t: "Density and particles", q: "A block has mass 600 g and volume 200 cm³. What is its density?", a: ["0.33 g/cm³", "3 g/cm³", "400 g/cm³", "120 000 g/cm³"], c: 1, why: "Density = mass ÷ volume." },
+    { t: "Radioactivity and half life", q: "Which radiation is stopped by paper?", a: ["Alpha", "Beta", "Gamma", "None of them"], c: 0, why: "Alpha is the most ionising but least penetrating." },
+    { t: "Radioactivity and half life", q: "A sample has 80 undecayed nuclei. How many are left after 2 half-lives?", a: ["40", "20", "10", "0"], c: 1, why: "80 → 40 → 20." }
+  ],
+  eng: [
+    { t: "Macbeth characters and quotes", q: "Who says “Look like th’ innocent flower, / But be the serpent under’t”?", a: ["Macbeth", "Lady Macbeth", "Banquo", "The Witches"], c: 1, why: "She tells Macbeth to hide his murderous intentions from Duncan." },
+    { t: "Macbeth characters and quotes", q: "Who says “Fair is foul, and foul is fair”?", a: ["The Witches", "Macduff", "Duncan", "Malcolm"], c: 0, why: "It sets up the play's theme of appearance versus reality." },
+    { t: "Macbeth characters and quotes", q: "Why can Macduff kill Macbeth despite the prophecy?", a: ["He is a king", "He was born by caesarean (“untimely ripp’d”)", "He has the witches' help", "He is Banquo's son"], c: 1, why: "The witches said no man “of woman born” could harm Macbeth." },
+    { t: "A Christmas Carol characters and quotes", q: "Dickens describes Scrooge as “solitary as an…”", a: ["Island", "Oyster", "Owl", "Orphan"], c: 1, why: "It shows Scrooge closed off from others, with the hope of something valuable inside." },
+    { t: "A Christmas Carol characters and quotes", q: "Which ghost reveals the children Ignorance and Want?", a: ["Christmas Past", "Christmas Present", "Christmas Yet to Come", "Marley"], c: 1, why: "Dickens uses them to warn the middle classes about neglecting the poor." },
+    { t: "A Christmas Carol characters and quotes", q: "Who was Fezziwig?", a: ["Scrooge's nephew", "Scrooge's kind former employer", "Bob Cratchit's son", "Scrooge's business partner"], c: 1, why: "He shows how an employer can make people happy at little cost." },
+    { t: "Context and writer's purpose", q: "When was A Christmas Carol published?", a: ["1743", "1843", "1903", "1943"], c: 1, why: "Victorian England, with the Poor Law and workhouses in the background." },
+    { t: "Blood Brothers characters and quotes", q: "In Blood Brothers, who takes one of the twins?", a: ["Mrs Johnstone's sister", "Mrs Lyons", "The Narrator", "Linda"], c: 1, why: "Mrs Johnstone works as Mrs Lyons' cleaner and gives Edward to her." },
+    { t: "Blood Brothers characters and quotes", q: "Where is Blood Brothers set?", a: ["London", "Manchester", "Liverpool", "Glasgow"], c: 2, why: "Russell explores class and opportunity in working-class Liverpool." },
+    { t: "Context and writer's purpose", q: "What is a big theme Russell explores in Blood Brothers?", a: ["How social class shapes people's lives", "Life at sea", "Royalty and power", "Science and religion"], c: 0, why: "The twins' different upbringing leads to very different chances in life." }
+  ],
+  lang: [
+    { t: "Paper 2 Q1 true statements", q: "Paper 2 Question 1 asks you to…", a: ["Write a viewpoint piece", "Choose four true statements", "Compare perspectives", "Analyse language"], c: 1, why: "It's worth 4 marks. Spend about 5 minutes on it." },
+    { t: "Paper 2 Q2 summary", q: "Question 2 asks for a summary of…", a: ["The writers' language", "Differences (or similarities) between the two sources", "Your own opinion", "The structure of Source A"], c: 1, why: "Worth 8 marks. Make inferences and support them with quotes from both sources." },
+    { t: "Paper 2 Q3 language analysis", q: "How many marks is Question 3 (language) worth?", a: ["4", "8", "12", "16"], c: 2, why: "Analyse words, phrases and techniques, and their effect on the reader." },
+    { t: "Paper 2 Q4 comparing perspectives", q: "Question 4 asks you to compare…", a: ["Writers' ideas and perspectives, and how they're conveyed", "Spelling in each source", "Only the titles", "The length of the sources"], c: 0, why: "It's worth 16 marks, the most in Section A. Spend about 20 minutes." },
+    { t: "Paper 2 Q5 viewpoint writing", q: "How many marks is Question 5 worth?", a: ["16", "24", "40", "50"], c: 2, why: "24 for content and organisation, 16 for technical accuracy." },
+    { t: "Paper 2 Q5 viewpoint writing", q: "How long should you spend on Question 5?", a: ["About 15 minutes", "About 25 minutes", "About 45 minutes", "About 1 hour 30"], c: 2, why: "Spend about 5 minutes planning, 35 writing and 5 checking." },
+    { t: "Paper 2 Q5 viewpoint writing", q: "Which is a good opening for a persuasive article?", a: ["“In this essay I will talk about…”", "A short, striking statement or question that grabs the reader", "A list of statistics with no comment", "“Dear Sir or Madam, hello”"], c: 1, why: "Hook the reader, then build your argument across clear paragraphs." },
+    { t: "Paper 2 Q3 language analysis", q: "“Isn't it time we acted?” is an example of…", a: ["A simile", "A rhetorical question", "Alliteration", "A statistic"], c: 1, why: "It makes the reader think, and assumes they agree with the writer." },
+    { t: "Paper 2 Q2 summary", q: "How many sources does Paper 2 give you?", a: ["One fiction extract", "Two non-fiction sources", "Three poems", "One letter"], c: 1, why: "Usually one from the 19th century and one from the 20th or 21st century." }
+  ],
+  hist: [
+    { t: "Jenner and vaccination", q: "Edward Jenner developed his smallpox vaccine in 1796 using…", a: ["Penicillin", "Cowpox", "Chloroform", "Carbolic acid"], c: 1, why: "He noticed milkmaids who caught cowpox didn't catch smallpox." },
+    { t: "Chadwick and public health", q: "Chadwick's 1842 report linked disease to…", a: ["Bad air from swamps", "Poor living conditions", "The four humours", "God's punishment"], c: 1, why: "It led to the first Public Health Act in 1848." },
+    { t: "Chadwick and public health", q: "What made the 1875 Public Health Act different from the 1848 one?", a: ["It was compulsory", "It was voluntary", "It banned vaccination", "It created the NHS"], c: 0, why: "Councils had to provide clean water, sewers and a medical officer." },
+    { t: "Pasteur and Koch", q: "Who published germ theory in 1861?", a: ["Robert Koch", "Louis Pasteur", "John Snow", "Joseph Lister"], c: 1, why: "He proved microbes cause decay, disproving spontaneous generation." },
+    { t: "Pasteur and Koch", q: "Robert Koch's big contribution was…", a: ["Identifying specific bacteria that cause specific diseases", "Discovering penicillin", "Inventing anaesthetics", "Founding the NHS"], c: 0, why: "He identified the bacteria causing TB (1882) and cholera, using staining techniques." },
+    { t: "Snow and cholera", q: "John Snow linked cholera to…", a: ["Bad air", "A water pump on Broad Street", "Rats", "Food from abroad"], c: 1, why: "In 1854 he mapped deaths around the pump and removed its handle." },
+    { t: "Penicillin and the NHS", q: "Who discovered penicillin in 1928?", a: ["Florey", "Chain", "Fleming", "Ehrlich"], c: 2, why: "Florey and Chain developed it, and mass production came in the Second World War." },
+    { t: "Penicillin and the NHS", q: "When was the NHS set up?", a: ["1918", "1928", "1948", "1968"], c: 2, why: "It was free at the point of use, created by Aneurin Bevan." },
+    { t: "Treaty of Versailles", q: "Which article of the Treaty of Versailles was the ‘war guilt’ clause?", a: ["Article 48", "Article 231", "Article 10", "Article 1"], c: 1, why: "Germany had to accept the blame and pay reparations of £6.6 billion." },
+    { t: "Weimar constitution", q: "Article 48 of the Weimar constitution let the President…", a: ["Rule by decree in an emergency", "Choose the Kaiser", "Ban elections", "Leave the League of Nations"], c: 0, why: "It was a weakness later used to undermine democracy." },
+    { t: "Weimar constitution", q: "The Kapp Putsch of 1920 failed because of…", a: ["The army", "A general strike", "French troops", "The League of Nations"], c: 1, why: "Workers in Berlin refused to work, so Kapp could not govern." },
+    { t: "Hyperinflation and the Ruhr", q: "Why did France and Belgium occupy the Ruhr in 1923?", a: ["Germany missed reparations payments", "To start a war", "To help the Spartacists", "To protect Stresemann"], c: 0, why: "Workers went on strike and the government printed money, causing hyperinflation." },
+    { t: "Stresemann's Golden Age", q: "Which of these did Stresemann introduce in 1923?", a: ["The Rentenmark", "The Treaty of Versailles", "Article 48", "The Enabling Act"], c: 0, why: "Then the Dawes Plan (1924), Locarno Pact (1925) and League of Nations membership (1926)." },
+    { t: "Rise of the Nazis", q: "When did Hitler become Chancellor?", a: ["November 1923", "October 1929", "January 1933", "September 1939"], c: 2, why: "30 January 1933, after the Depression boosted Nazi support." }
+  ],
+  fr: [
+    { t: "Present tense", q: "“Nous ___ contents.” (être)", a: ["sommes", "êtes", "sont", "suis"], c: 0, why: "Être: je suis, tu es, il est, nous sommes, vous êtes, ils sont." },
+    { t: "Present tense", q: "“Je ___ au cinéma.” (aller)", a: ["vas", "vais", "va", "allons"], c: 1, why: "Aller: je vais, tu vas, il va, nous allons, vous allez, ils vont." },
+    { t: "Present tense", q: "“Ils ___ deux chiens.” (avoir)", a: ["avons", "ont", "a", "avez"], c: 1, why: "Avoir: j'ai, tu as, il a, nous avons, vous avez, ils ont." },
+    { t: "Perfect tense (avoir and être)", q: "Which verb uses être in the perfect tense?", a: ["Manger", "Regarder", "Aller", "Faire"], c: 2, why: "Movement verbs like aller, venir, partir, arriver use être." },
+    { t: "Perfect tense (avoir and être)", q: "“She went to Paris” is…", a: ["Elle a allé à Paris", "Elle est allé à Paris", "Elle est allée à Paris", "Elle va à Paris"], c: 2, why: "With être, the past participle agrees with the subject: add -e for feminine." },
+    { t: "Perfect tense (avoir and être)", q: "What is the past participle of faire?", a: ["Faisé", "Fait", "Fais", "Fité"], c: 1, why: "“J'ai fait mes devoirs”: I did my homework." },
+    { t: "Family and relationships vocab", q: "“Je m'entends bien avec ma sœur” means…", a: ["I argue with my sister", "I get on well with my sister", "I look like my sister", "I live with my sister"], c: 1, why: "“Je me dispute avec…” means I argue with." },
+    { t: "Family and relationships vocab", q: "“Mon frère aîné” means…", a: ["My younger brother", "My older brother", "My twin brother", "My stepbrother"], c: 1, why: "Cadet / cadette = younger." },
+    { t: "Festivals vocab", q: "What is Easter in French?", a: ["Noël", "Pâques", "La Toussaint", "Le Nouvel An"], c: 1, why: "Noël = Christmas. La Toussaint = All Saints' Day." },
+    { t: "Festivals vocab", q: "“On a fêté mon anniversaire” means…", a: ["We will celebrate my birthday", "We celebrated my birthday", "We are celebrating my birthday", "We would celebrate my birthday"], c: 1, why: "Perfect tense with avoir: on a + past participle." }
+  ]
+};
