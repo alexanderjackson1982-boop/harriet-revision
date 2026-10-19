@@ -10,7 +10,8 @@ const SUBJECTS = {
   eng:   { name: "English Literature", colour: "--eng" },
   lang:  { name: "English Language", colour: "--lang" },
   hist:  { name: "History", colour: "--hist" },
-  fr:    { name: "French", colour: "--fr" }
+  fr:    { name: "French", colour: "--fr" },
+  sci:   { name: "Science skills", colour: "--sci" }
 };
 
 const yt = q => "https://www.youtube.com/results?search_query=" + encodeURIComponent(q);
@@ -142,10 +143,11 @@ const DAYS = [
 /* Topics for the "Where I'm struggling" tracker */
 const TOPICS = {
   maths: ["Expanding brackets", "Factorising", "Solving linear equations", "Solving quadratics", "nth term of sequences", "Angles in parallel lines", "Angles in polygons", "Percentages and reverse percentages", "Compound interest", "Standard form", "Index laws"],
-  bio: ["Animal and plant cells", "Microscopy and magnification", "Diffusion, osmosis, active transport", "Enzymes and digestion", "Heart, blood and lungs", "Communicable disease", "Vaccines and antibiotics", "Photosynthesis", "Respiration"],
-  chem: ["Atomic structure and isotopes", "Groups 0, 1 and 7", "Ionic and covalent bonding", "Moles and concentration", "Acids, alkalis and salts", "Making salts practical", "Electrolysis", "Exothermic and endothermic"],
+  sci: ["Writing methods for required practicals", "Comparing advantages and disadvantages", "Reading data from graphs"],
+  bio: ["Disease and plant growth (TMV, rose black spot)", "How vaccines give immunity", "Animal and plant cells", "Microscopy and magnification", "Diffusion, osmosis, active transport", "Enzymes and digestion", "Heart, blood and lungs", "Communicable disease", "Vaccines and antibiotics", "Photosynthesis", "Respiration"],
+  chem: ["Ionic and covalent bonding", "Metal structure and properties", "Atomic structure and isotopes", "Groups 0, 1 and 7", "Moles and concentration", "Acids, alkalis and salts", "Making salts practical", "Electrolysis", "Exothermic and endothermic"],
   phys: ["Energy stores and equations", "Efficiency", "Specific heat capacity", "Energy resources", "Circuits and V = IR", "Mains electricity", "Density and particles", "Radioactivity and half life"],
-  eng: ["Macbeth characters and quotes", "A Christmas Carol characters and quotes", "Blood Brothers characters and quotes", "Context and writer's purpose", "Essay structure"],
+  eng: ["Explaining what a quote suggests and implies", "Macbeth characters and quotes", "A Christmas Carol characters and quotes", "Blood Brothers characters and quotes", "Context and writer's purpose", "Essay structure"],
   lang: ["Paper 2 Q1 true statements", "Paper 2 Q2 summary", "Paper 2 Q3 language analysis", "Paper 2 Q4 comparing perspectives", "Paper 2 Q5 viewpoint writing", "Spelling and punctuation"],
   hist: ["Jenner and vaccination", "Chadwick and public health", "Pasteur and Koch", "Snow and cholera", "Penicillin and the NHS", "Treaty of Versailles", "Weimar constitution", "Hyperinflation and the Ruhr", "Stresemann's Golden Age", "Rise of the Nazis"],
   fr: ["Family and relationships vocab", "Festivals vocab", "Present tense", "Perfect tense (avoir and être)", "Speaking answers", "Writing 90 and 150 words"]
@@ -168,17 +170,35 @@ const VIDEOS = {
   "tue20-1": [["The nuclear model of the atom", "cI2Shr8nns8"], ["Atomic number and mass number", "nyvVjJf7RAU"], ["Group 1", "Z9U0728-fPY"]],
   "tue20-2": [["French present tense in 5 minutes", "J1TyBDrYVOM"]],
   "wed21-0": [["Être or avoir in the perfect tense", "97VoMBmaDYk"]],
-  "wed21-1": [["Energy stores and transfers", "JGwcDCeYRYo"], ["Efficiency", "KbrqbW0um0Y"]],
-  "wed21-2": [["A Christmas Carol: top set analysis", "e98F6whQUFM"], ["Ghost of Christmas Past: key quotes", "uJNeHdlg1VU"], ["Scrooge in Stave Five", "Oe81CB3GADU"]],
-  "thu22-1": [["Vaccination", "uPeZBhJYlnU"], ["Photosynthesis", "rAJGnS_ktk4"], ["Respiration", "ZKAaDbTP6Dc"]],
+  "wed21-1": [["Energy stores and transfers", "JGwcDCeYRYo"], ["Efficiency", "KbrqbW0um0Y"], ["Writing the specific heat capacity method", "pTom2TIZNI8"]],
+  "wed21-2": [["Explode a quote", "2OjbmRycHqg"], ["A Christmas Carol: top set analysis", "e98F6whQUFM"], ["Ghost of Christmas Past: key quotes", "uJNeHdlg1VU"], ["Scrooge in Stave Five", "Oe81CB3GADU"]],
+  "thu22-1": [["Vaccination", "uPeZBhJYlnU"], ["Tobacco mosaic virus", "20cD4iu1aF8"], ["Rose black spot", "iu-zn8cN27k"], ["Photosynthesis", "rAJGnS_ktk4"], ["Respiration", "ZKAaDbTP6Dc"]],
   "fri23-0": [["The Ruhr and hyperinflation", "z_-xakexp8E"], ["Hyperinflation in 1923", "kJmbLz-5Ubg"]],
-  "fri23-1": [["Ionic bonding", "XbDtmORzKO8"]],
-  "fri23-2": [["Blood Brothers: plot analysis", "XBEBP9Gvqew"], ["Mickey and Edward: key quotes", "v8vzvLbNeEQ"]],
-  "mon26-0": [["Series circuits", "ZQurBlu35Fo"], ["Radioactive decay and half life", "wvgT52mwM3Y"]],
+  "fri23-1": [["Ionic bonding", "XbDtmORzKO8"], ["Covalent bonding", "m5u4STdFlOE"], ["Metallic bonding and properties of metals", "tRKkGRBndto"]],
+  "fri23-2": [["How to analyse in more depth", "LYucRK_KVMw"], ["Blood Brothers: plot analysis", "XBEBP9Gvqew"], ["Mickey and Edward: key quotes", "v8vzvLbNeEQ"]],
+  "mon26-0": [["Describing and explaining graphs", "OzDUYj6nNCA"], ["Series circuits", "ZQurBlu35Fo"], ["Radioactive decay and half life", "wvgT52mwM3Y"]],
   "mon26-1": [["John Snow and cholera", "d3WKnHlXaBc"], ["Penicillin", "RsXHqYSIbbY"], ["Medicine in modern Britain", "Js2s8iwoNtQ"]],
-  "tue27-0": [["Introducing electrolysis", "AhTRiL6xjBA"], ["Electrolysis required practical", "ukbtTTG1Kew"], ["Exothermic and endothermic", "4HS6D0hTzdg"]],
+  "tue27-0": [["Introducing electrolysis", "AhTRiL6xjBA"], ["Electrolysis required practical", "ukbtTTG1Kew"], ["Exothermic and endothermic", "4HS6D0hTzdg"], ["Temperature changes required practical", "rdI7xEq4Ew8"]],
   "tue27-2": [["Paper 2, Question 2", "pFGLjE7fRGw"], ["Paper 2, Question 5", "NbEIo0Mq7bg"]],
   "sun1-0":  [["Stresemann and the Golden Age", "XSQbL-s9ky4"], ["Economic recovery in the 1920s", "z0iW8ChjE48"]],
   "sun1-1":  [["Eukaryotes and prokaryotes", "s9wf1Zf1AJM"], ["Osmosis required practical", "ZcYmb9A7Fu0"], ["The heart and circulation", "bpYaKM2hVFY"]],
   "sun1-2":  [["Paper 2, Question 5", "NbEIo0Mq7bg"], ["Question 5: updated edition", "lPcIVXhAp7M"]]
+};
+
+/* Focus points from school feedback, shown on the matching blocks */
+const FOCUS = {
+  "tue20-1": "Practise drawing and explaining ionic bonding (electrons transferred) next to covalent bonding (electrons shared).",
+  "wed21-1": "Write the specific heat capacity method in full: equipment, what you measure, with what, and how you calculate c.",
+  "wed21-2": "For every quote, write what it suggests and what it implies. Don't stop at what it says.",
+  "thu22-1": "Explain step by step how a vaccine gives immunity, and how TMV and rose black spot reduce plant growth (less photosynthesis).",
+  "fri23-1": "Compare ionic, covalent and metallic bonding. Explain why metals conduct, are malleable and have high melting points.",
+  "fri23-2": "Explore the deeper meaning of each quote: what Russell suggests about class, and what he implies about fate and society.",
+  "mon26-0": "Read values off graphs carefully: check the scale, use a ruler, give units. Describe trends with numbers.",
+  "tue27-0": "Write the electrolysis and temperature-change methods: equipment, what you measure, and how.",
+  "sun1-1": "Write the osmosis practical method: what you measure (mass), with what (balance), and how (percentage change)."
+};
+
+const FOCUS_AREAS = {
+  science: ["Writing methods for required practicals: what you measure and the equipment you use", "Comparing information: advantages and disadvantages, using correct science words", "Reading data from graphs", "How diseases affect the growth of organisms", "How vaccines bring about immunity", "Covalent and ionic bonding", "How the structure of metals gives their properties"],
+  english: ["Explain the metaphorical meaning of quotations", "Say what is suggested and explore what is implied", "Develop analysis further: don't stop at the facts"]
 };

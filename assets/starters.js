@@ -1,5 +1,65 @@
+/* Packs built from Harriet's school feedback. Marked focus: true so they show first. */
+const FOCUS_PACKS = {
+  sciSkills: { subject: "sci", focus: true, name: "Science skills: methods, comparing, graphs", cards: [
+    ["Writing a practical method: what must it include?", "1. Equipment list. 2. Numbered steps in order. 3. What you will MEASURE and WHAT WITH (e.g. temperature with a thermometer). 4. What you keep the same. 5. Repeat and calculate a mean."],
+    ["Independent, dependent and control variables", "Independent: the one you change. Dependent: the one you measure. Control: the ones you keep the same so it's a fair test."],
+    ["Osmosis practical: what do you measure, and with what?", "Mass of each potato cylinder before and after, using a balance. Calculate percentage change in mass. Keep cylinders the same size (cork borer), blot dry, leave for the same time in each sugar solution."],
+    ["Making a salt practical: method", "Warm the acid in a beaker. Add insoluble base (e.g. copper oxide) until no more dissolves. Filter (funnel and filter paper) to remove the excess. Heat the filtrate in an evaporating basin, then leave to crystallise."],
+    ["Temperature change practical: what do you measure?", "Temperature with a thermometer before and after mixing, in a polystyrene cup with a lid (to reduce energy loss). Calculate the temperature change."],
+    ["Electrolysis practical: what do you observe and test?", "Use inert (graphite) electrodes. Look for bubbles or metal on each electrode. Test gases: hydrogen squeaky pop, oxygen relights a glowing splint, chlorine bleaches damp litmus."],
+    ["Specific heat capacity practical: what do you measure?", "Mass of the block (balance), temperature rise (thermometer), energy supplied (joulemeter, or V × I × t). Then c = ΔE ÷ (m × Δθ). Insulate the block."],
+    ["Photosynthesis rate practical: method", "Put pondweed in water at set distances from a lamp. Count oxygen bubbles (or measure gas volume) in a set time. Keep temperature and carbon dioxide the same."],
+    ["How to answer an ‘advantages and disadvantages’ question", "Give at least one advantage AND one disadvantage, each with a reason using science words. If asked to evaluate, finish with a judgement: ‘Overall… because…’."],
+    ["Words that show you're comparing", "whereas, however, both, more than, less than, similarly. Make every point about BOTH things."],
+    ["Example: advantages and disadvantages of wind turbines", "Advantages: renewable, no carbon dioxide released while generating. Disadvantages: unreliable (depends on wind), noise and visual pollution, high set-up cost."],
+    ["Reading a value from a graph: 4 steps", "1. Read the axis labels and units. 2. Work out what one small square is worth. 3. Use a ruler to go from the axis to the line and across. 4. Write the value WITH units."],
+    ["Describing a trend in a graph", "Say the overall pattern (increases / decreases), quote two values with units from the graph, and say where the pattern changes (e.g. ‘levels off at 40 °C’)."],
+    ["Finding a rate or gradient from a graph", "Draw a large triangle on the straight part. Gradient = change in y ÷ change in x. Include units (e.g. cm³/s)."]
+  ]},
+  disease: { subject: "bio", focus: true, name: "Disease, growth and vaccines", cards: [
+    ["How does tobacco mosaic virus (TMV) affect plant growth?", "It causes a mosaic pattern of discoloured leaves. Less chlorophyll means less photosynthesis, so less glucose for growth. The plant is stunted."],
+    ["How does rose black spot affect plant growth?", "A fungus. Purple or black spots on leaves, which turn yellow and drop early. Fewer leaves means less photosynthesis, so the plant grows less. Spread by water and wind; treat with fungicide and remove affected leaves."],
+    ["The chain to explain any disease reducing growth", "Pathogen damages leaves or cells → less chlorophyll or leaf area → less photosynthesis → less glucose → less energy from respiration and fewer materials (e.g. proteins, cellulose) for new cells → slower growth."],
+    ["Measles", "Virus. Fever and red rash. Spread by droplets from sneezes and coughs. Prevented by vaccination."],
+    ["HIV", "Virus. Attacks the immune system's white blood cells; can lead to AIDS. Spread by sexual contact and body fluids. Controlled with antiretroviral drugs."],
+    ["Salmonella", "Bacterium. Food poisoning: fever, cramps, vomiting, diarrhoea, caused by toxins. Poultry are vaccinated to control it."],
+    ["How does a vaccine give immunity? (4 steps)", "1. Contains dead or inactive pathogen. 2. Its antigens make white blood cells (lymphocytes) produce specific antibodies. 3. Memory cells stay in the blood. 4. If the real pathogen enters, antibodies are made much faster and in larger numbers, so you don't get ill."],
+    ["Antigens and antibodies: what's the difference?", "Antigens are proteins on the surface of a pathogen. Antibodies are proteins made by white blood cells that lock on to one specific antigen."],
+    ["Three ways white blood cells defend the body", "Phagocytosis (engulfing pathogens), producing antibodies, producing antitoxins."],
+    ["What is herd immunity?", "When most people are vaccinated, the pathogen can't spread easily, which protects people who aren't immune."],
+    ["Advantage and disadvantage of vaccination", "Advantage: prevents illness and can stop epidemics. Disadvantage: possible side effects (e.g. sore arm, rarely a bad reaction), and they don't always give immunity."]
+  ]},
+  bonding: { subject: "chem", focus: true, name: "Bonding and metals", cards: [
+    ["Ionic bonding: what happens?", "Between a metal and a non-metal. The metal loses electrons to become a positive ion; the non-metal gains them to become a negative ion. Opposite ions are held by strong electrostatic attraction."],
+    ["Ionic bonding example: sodium chloride", "Sodium loses 1 electron → Na⁺. Chlorine gains 1 electron → Cl⁻. Both now have full outer shells."],
+    ["Properties of ionic compounds and why", "Giant lattice. High melting points: lots of energy needed to overcome strong attractions. Conduct when melted or dissolved (ions free to move), but not as solids."],
+    ["Covalent bonding: what happens?", "Between non-metals. Atoms share pairs of electrons to get full outer shells."],
+    ["Simple covalent molecules (e.g. water, CO₂): properties and why", "Low melting and boiling points because only weak forces between molecules need breaking (not the covalent bonds). Don't conduct electricity."],
+    ["Giant covalent structures (diamond, graphite, silicon dioxide)", "Very high melting points: many strong covalent bonds must break. Graphite conducts because of delocalised electrons; diamond doesn't."],
+    ["Metallic bonding: describe the structure", "A giant structure of positive metal ions in a ‘sea’ of delocalised electrons, held by strong electrostatic attraction."],
+    ["Why do metals conduct electricity and heat?", "The delocalised electrons can move through the structure, carrying charge and energy."],
+    ["Why do metals have high melting points?", "Strong metallic bonds: lots of energy is needed to overcome the attraction between ions and delocalised electrons."],
+    ["Why are pure metals malleable?", "The layers of ions can slide over each other."],
+    ["Why are alloys harder than pure metals?", "Atoms of different sizes distort the layers, so they can't slide over each other as easily."],
+    ["Ionic vs covalent vs metallic in one line each", "Ionic: electrons transferred (metal + non-metal). Covalent: electrons shared (non-metals). Metallic: ions in a sea of delocalised electrons (metals)."]
+  ]},
+  analysis: { subject: "eng", focus: true, name: "Developing analysis: suggests and implies", cards: [
+    ["The analysis ladder: 4 steps for every quote", "1. Short quote. 2. What it literally says. 3. What it SUGGESTS (the image or metaphor). 4. What it IMPLIES about the character or theme, and why the writer chose it."],
+    ["Sentence starters for ‘suggests’", "This suggests…, The image of … connotes…, This evokes…, The metaphor presents … as…"],
+    ["Sentence starters for ‘implies’", "This implies…, Shakespeare / Dickens may be hinting that…, The reader could infer…, On a deeper level…"],
+    ["Zooming in on one word", "Pick the most powerful word. Give two or three of its connotations, then link them to the character or theme."],
+    ["Offering a second interpretation", "However, it could also suggest…, which presents … as…"],
+    ["Linking to the writer's purpose", "Shakespeare / Dickens / Russell uses this to warn, criticise or show the audience that…"],
+    ["Develop it: “O, full of scorpions is my mind”", "Says: his mind is full of scorpions. Suggests: thoughts that sting, poison and won't keep still. Implies: guilt and paranoia torture him from inside; Shakespeare shows that murder brings no peace."],
+    ["Develop it: “solitary as an oyster”", "Says: Scrooge is alone. Suggests: hard, closed, shut away from others. Implies: an oyster can hold a pearl, so Dickens hints there is goodness inside Scrooge waiting to be revealed."],
+    ["Develop it: “But be the serpent under’t”", "Says: hide like a snake under a flower. Suggests: hidden danger behind innocence. Implies: links Lady Macbeth to the devil in Eden; she tempts Macbeth into sin as the serpent tempted Eve."],
+    ["Develop it: “Out, damned spot!”", "Says: she wants a stain gone. Suggests: guilt she can't wash away. Implies: a reversal of her earlier ‘a little water clears us of this deed’; Shakespeare shows guilt destroying the mind."],
+    ["Develop it: “I wear the chain I forged in life”", "Says: Marley carries a chain. Suggests: being trapped and weighed down. Implies: our greedy choices build our own punishment; Dickens warns readers to change before it's too late."]
+  ]}
+};
+
 /* Starter flashcard packs. Each card is [front, back]. Harriet can add these to her own cards with one tap. */
-const STARTERS = {
+const BASE_PACKS = {
   eng: { name: "Macbeth quotes", cards: [
     ["“Fair is foul, and foul is fair”: who says it, and what does it show?", "The Witches (Act 1, Scene 1). Things are not what they seem: appearance versus reality."],
     ["“Stars, hide your fires; / Let not light see my black and deep desires”", "Macbeth (Act 1, Scene 4). He hides his ambition to be king, even from himself."],
@@ -119,3 +179,5 @@ const STARTERS = {
     ["Persuasive techniques", "Direct address, anecdote, facts, opinions, rhetorical questions, the rule of three, statistics, emotive language"]
   ]}
 };
+
+const STARTERS = Object.assign({}, FOCUS_PACKS, BASE_PACKS);
