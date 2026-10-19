@@ -6,7 +6,30 @@ const MOCKS = new Date(2026, 10, 9); // 9 November 2026
 const blank = () => ({ ticks: {}, rag: {}, notes: {}, missed: {}, best: {}, log: [], qs: [] });
 let st = blank();
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && typeof s === "object") st = Object.assign(blank(), s); } catch (e) {}
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+/* Daily email: paste the Apps Script web app URL between the quotes to switch it on */
+const SYNC_URL = "https://script.google.com/macros/s/AKfycbx2D7tm-GFaB5KlZbrL-3YHpjSfHbGxQuMmx1kfVhF048eAeX8OyIuGElQMTs4dmQXh/exec";
+const SYNC_KEY = "harriet-mocks-2026";
+let syncTimer = null;
+const save = () => {
+  try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {}
+  if (SYNC_URL) { clearTimeout(syncTimer); syncTimer = setTimeout(sync, 2500); }
+};
+function summary() {
+  let done = 0, total = 0;
+  const days = DAYS.filter(d => !d.gap).map(d => ({ date: d.date, name: d.name, blocks: d.blocks.map((b, i) => {
+    const w = b[5] || 1, ok = !!st.ticks[`${d.id}-${i}`]; total += w; if (ok) done += w;
+    return { subject: SUBJECTS[b[0]].name, title: b[1], done: ok };
+  }) }));
+  const rated = c => Object.entries(st.rag).filter(([, v]) => v === c).map(([k]) => { const [s, t] = k.split("|"); return `${SUBJECTS[s] ? SUBJECTS[s].name : s}: ${t}`; });
+  const quizzes = {}; Object.entries(st.best).forEach(([s, v]) => { quizzes[SUBJECTS[s] ? SUBJECTS[s].name : s] = `${v.score} / ${v.total}`; });
+  return { key: SYNC_KEY, done, total, days, red: rated("r"), amber: rated("a"), quizzes,
+    mistakesOpen: st.log.filter(r => (r.w || "").trim() && !r.f).length,
+    questions: st.qs.filter(q => (q.t || "").trim() && !q.done).map(q => q.t) };
+}
+function sync() {
+  try { fetch(SYNC_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(summary()) }).catch(() => {}); } catch (e) {}
+}
+window.addEventListener("pagehide", () => { if (SYNC_URL && syncTimer) { clearTimeout(syncTimer); try { navigator.sendBeacon(SYNC_URL, new Blob([JSON.stringify(summary())], { type: "text/plain" })); } catch (e) {} } });
 
 const $ = s => document.querySelector(s);
 const el = (tag, attrs = {}, ...kids) => {
@@ -76,7 +99,7 @@ function renderDays() {
           el("label", { class: "btitle", for: key }, title),
           el("p", { class: "what" }, what),
           el("div", { class: "use" }, el("b", {}, "Use"), el("span", {}, use)),
-          links && links.length ? el("div", { class: "chips" }, links.map(([t, u]) => el("a", { class: "chip", href: u, target: "_blank", rel: "noopener" }, t))) : null)));
+          resources(key, links || []))));
     });
     const subs = [...new Set(d.blocks.map(b => b[0]))];
     card.append(el("div", { class: "close" },
@@ -84,6 +107,54 @@ function renderDays() {
       el("span", { class: "row-actions" }, subs.map(s => el("button", { type: "button", onclick: () => { location.hash = "quiz"; startQuiz(s); } }, `Quiz: ${SUBJECTS[s].name}`)))));
     box.append(card);
   });
+}
+
+/* ---------- RESOURCES: video boxes, worksheet cards, links ---------- */
+const ytId = u => { const m = String(u).match(/youtu\.be\/([\w-]{11})/) || String(u).match(/[?&]v=([\w-]{11})/); return m ? m[1] : null; };
+function resources(key, links) {
+  const vids = (typeof VIDEOS !== "undefined" && VIDEOS[key] ? VIDEOS[key] : []).map(([t, id]) => ({ t, id }));
+  const sheets = [], sites = [];
+  links.forEach(([t, u]) => {
+    if (/youtube\.com\/results/.test(u)) return;
+    const id = ytId(u);
+    if (id) { if (!vids.some(v => v.id === id)) vids.push({ t: (x => x.charAt(0).toUpperCase() + x.slice(1))(t.replace(/^Video:\s*/i, "")), id }); return; }
+    (/\.pdf($|\?)/i.test(u) ? sheets : sites).push([t, u]);
+  });
+  if (!vids.length && !sheets.length && !sites.length) return null;
+  const box = el("div", { class: "res" });
+  if (vids.length) box.append(el("div", { class: "reslabel" }, `Watch · ${vids.length} video${vids.length > 1 ? "s" : ""}`),
+    el("div", { class: "vids" }, vids.map(v => el("button", { type: "button", class: "vid", "aria-label": `Play video: ${v.t}`, onclick: () => openVideo(v) },
+      el("span", { class: "thumb", style: `background-image:url(https://i.ytimg.com/vi/${v.id}/mqdefault.jpg)` }, el("i", { class: "play", "aria-hidden": "true" })),
+      el("span", { class: "vt" }, v.t)))));
+  if (sheets.length) box.append(el("div", { class: "reslabel" }, "Practise · worksheets"),
+    el("div", { class: "sheets" }, sheets.map(([t, u]) => el("a", { class: "sheet", href: u, target: "_blank", rel: "noopener" }, el("b", { "aria-hidden": "true" }, "PDF"), el("span", {}, t.replace(/\s*worksheet$/i, ""))))));
+  if (sites.length) box.append(el("div", { class: "reslabel" }, "Read · websites"),
+    el("div", { class: "chips" }, sites.map(([t, u]) => el("a", { class: "chip", href: u, target: "_blank", rel: "noopener" }, t))));
+  return box;
+}
+let modal = null, lastFocus = null;
+function openVideo(v) {
+  lastFocus = document.activeElement;
+  if (!modal) {
+    modal = el("div", { class: "modal", role: "dialog", "aria-modal": "true", "aria-labelledby": "modal-title", hidden: true },
+      el("div", { class: "modal-back", onclick: closeVideo }),
+      el("div", { class: "modal-box" },
+        el("div", { class: "modal-head" }, el("h3", { id: "modal-title" }), el("button", { type: "button", class: "modal-x", "aria-label": "Close video", onclick: closeVideo }, "×")),
+        el("div", { class: "frame" }),
+        el("div", { class: "modal-foot" }, el("span", {}, "Video not playing?"), el("a", { class: "yt-link", target: "_blank", rel: "noopener" }, "Watch on YouTube"))));
+    document.body.append(modal);
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && !modal.hidden) closeVideo(); });
+  }
+  modal.querySelector("#modal-title").textContent = v.t;
+  modal.querySelector(".yt-link").href = `https://www.youtube.com/watch?v=${v.id}`;
+  modal.querySelector(".frame").replaceChildren(el("iframe", { src: `https://www.youtube-nocookie.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1`, title: v.t, allow: "autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: true }));
+  modal.hidden = false; document.body.style.overflow = "hidden";
+  modal.querySelector(".modal-x").focus();
+}
+function closeVideo() {
+  if (!modal) return;
+  modal.hidden = true; modal.querySelector(".frame").replaceChildren(); document.body.style.overflow = "";
+  if (lastFocus) lastFocus.focus();
 }
 
 function refresh() {

@@ -161,3 +161,24 @@ const LINKS = [
   ["History", [["Save My Exams: Medicine in Britain", "https://www.savemyexams.com/gcse/history/edexcel/18/topics/medicine-in-britain-c-1250-present"], ["tutor2u: Weimar and Nazi Germany", "https://tutor2u.net/history/collections/edexcel-gcse-weimar-and-nazi-germany-1918-1939"], ["Microsoft Teams (class resources)", "https://teams.microsoft.com/"]]],
   ["French", [["Seneca: free AQA French", "https://senecalearning.com/en-GB/blog/free-aqa-french-gcse-revision/"], ["Identity and relationships", "https://www.bbc.co.uk/bitesize/topics/z667ywx"], ["Present tense verbs", "https://www.bbc.co.uk/bitesize/topics/zdyxywx"], ["Customs and festivals", "https://www.bbc.co.uk/bitesize/topics/znn6g2p"], ["Past tense verbs", "https://www.bbc.co.uk/bitesize/topics/zwv6vj6"], ["Future and conditional", "https://www.bbc.co.uk/bitesize/topics/zj3t3qt"]]]
 ];
+
+/* Videos that play inside the site, per block ("dayid-blockNumber", counting from 0) */
+const VIDEOS = {
+  "tue20-0": [["Jenner and vaccination", "N62VqXEKnSk"], ["Public health in the 1800s", "fTIREIMBQk0"], ["Pasteur and germ theory", "oMNIQ_0_yCI"], ["Robert Koch", "ZHW6kdeX3cI"]],
+  "tue20-1": [["The nuclear model of the atom", "cI2Shr8nns8"], ["Atomic number and mass number", "nyvVjJf7RAU"], ["Group 1", "Z9U0728-fPY"]],
+  "tue20-2": [["French present tense in 5 minutes", "J1TyBDrYVOM"]],
+  "wed21-0": [["Être or avoir in the perfect tense", "97VoMBmaDYk"]],
+  "wed21-1": [["Energy stores and transfers", "JGwcDCeYRYo"], ["Efficiency", "KbrqbW0um0Y"]],
+  "wed21-2": [["A Christmas Carol: top set analysis", "e98F6whQUFM"], ["Ghost of Christmas Past: key quotes", "uJNeHdlg1VU"], ["Scrooge in Stave Five", "Oe81CB3GADU"]],
+  "thu22-1": [["Vaccination", "uPeZBhJYlnU"], ["Photosynthesis", "rAJGnS_ktk4"], ["Respiration", "ZKAaDbTP6Dc"]],
+  "fri23-0": [["The Ruhr and hyperinflation", "z_-xakexp8E"], ["Hyperinflation in 1923", "kJmbLz-5Ubg"]],
+  "fri23-1": [["Ionic bonding", "XbDtmORzKO8"]],
+  "fri23-2": [["Blood Brothers: plot analysis", "XBEBP9Gvqew"], ["Mickey and Edward: key quotes", "v8vzvLbNeEQ"]],
+  "mon26-0": [["Series circuits", "ZQurBlu35Fo"], ["Radioactive decay and half life", "wvgT52mwM3Y"]],
+  "mon26-1": [["John Snow and cholera", "d3WKnHlXaBc"], ["Penicillin", "RsXHqYSIbbY"], ["Medicine in modern Britain", "Js2s8iwoNtQ"]],
+  "tue27-0": [["Introducing electrolysis", "AhTRiL6xjBA"], ["Electrolysis required practical", "ukbtTTG1Kew"], ["Exothermic and endothermic", "4HS6D0hTzdg"]],
+  "tue27-2": [["Paper 2, Question 2", "pFGLjE7fRGw"], ["Paper 2, Question 5", "NbEIo0Mq7bg"]],
+  "sun1-0":  [["Stresemann and the Golden Age", "XSQbL-s9ky4"], ["Economic recovery in the 1920s", "z0iW8ChjE48"]],
+  "sun1-1":  [["Eukaryotes and prokaryotes", "s9wf1Zf1AJM"], ["Osmosis required practical", "ZcYmb9A7Fu0"], ["The heart and circulation", "bpYaKM2hVFY"]],
+  "sun1-2":  [["Paper 2, Question 5", "NbEIo0Mq7bg"], ["Question 5: updated edition", "lPcIVXhAp7M"]]
+};
