@@ -28,9 +28,9 @@
 
   <nav class="tabs" role="tablist" aria-label="Sections">
     <a href="#plan" role="tab" data-tab="plan">Plan</a>
-    <a href="#quiz" role="tab" data-tab="quiz">Quizzes</a>
+    <a href="#quiz" role="tab" data-tab="quiz">Practise</a>
     <a href="#cards" role="tab" data-tab="cards">Flashcards</a>
-    <a href="#tracker" role="tab" data-tab="tracker">Where I'm stuck</a>
+    <a href="#tracker" role="tab" data-tab="tracker">Mistakes &amp; progress</a>
     <a href="#links" role="tab" data-tab="links">All links</a>
   </nav>
 
@@ -60,6 +60,13 @@
       </div>
     </section>
 
+    <section class="panel">
+      <div class="label">Focus from school</div>
+      <h2>What your teachers want you to work on</h2>
+      <p class="small">From your recent assessments. These are marked "Teacher focus" in the plan, and each has its own flashcards.</p>
+      <div class="focus" id="focus"></div>
+    </section>
+
     <section class="panel method">
       <div class="label">Every block, 50 minutes</div>
       <h2>Answers on paper, not just reading</h2>
@@ -79,13 +86,28 @@
 
   <!-- QUIZZES -->
   <section id="tab-quiz" class="tab" hidden>
-    <section class="panel">
-      <div class="label">Quick quizzes</div>
-      <h2>Two minutes per subject</h2>
-      <p class="lead">Pick a subject. Each answer tells you why. Anything you get wrong goes into your tracker automatically, so you know what to look at again.</p>
-      <div class="quizgrid" id="quizgrid"></div>
-    </section>
-    <section class="panel quizbox" id="quizbox" hidden></section>
+    <div id="practise-home" class="tab">
+      <section class="panel">
+        <div class="label">How long have you got?</div>
+        <h2>Pick a session</h2>
+        <div class="sessions" id="sessions"></div>
+      </section>
+      <section class="panel">
+        <div class="label">Exam coach</div>
+        <h2>Practise exam technique</h2>
+        <p class="lead">Worked examples, then exam-style questions you mark yourself against guidance. Anything you don't get full marks on comes back for a retry.</p>
+        <div class="quizgrid" id="modules"></div>
+        <p class="small">These are practice questions written in a GCSE style, not official exam-board papers.</p>
+      </section>
+      <section class="panel">
+        <div class="label">Quick quizzes</div>
+        <h2>Two minutes per subject</h2>
+        <p class="small">Each answer tells you why. Wrong answers go into your mistake log.</p>
+        <div class="quizgrid" id="quizgrid"></div>
+      </section>
+      <section class="panel quizbox" id="quizbox" hidden></section>
+    </div>
+    <section class="panel module" id="module" hidden></section>
   </section>
 
   <!-- FLASHCARDS -->
@@ -100,6 +122,14 @@
         <div class="row-actions">
           <button class="btn" id="fc-study" type="button">Study due cards</button>
           <button class="btn ghost" id="fc-cram" type="button">Practise every card</button>
+        </div>
+        <div class="printrow">
+          <label for="fc-layout">Print on A4</label>
+          <select id="fc-layout">
+            <option value="fold">Fold in half (single-sided, 7 per page)</option>
+            <option value="double">Double-sided cards (8 per page)</option>
+          </select>
+          <button class="btn ghost" id="fc-print" type="button">Print these cards</button>
         </div>
       </section>
 
@@ -134,9 +164,55 @@
   <!-- TRACKER -->
   <section id="tab-tracker" class="tab" hidden>
     <section class="panel">
-      <div class="label">Where I'm stuck</div>
-      <h2>Rate every topic</h2>
-      <p class="lead">Tap a colour for each topic. <b class="rag-r">Red</b> means you're stuck, <b class="rag-a">amber</b> means you're getting there, <b class="rag-g">green</b> means you've got it. Add a note to remind yourself what's confusing.</p>
+      <div class="label">Your next best steps</div>
+      <h2>What to practise next</h2>
+      <div class="recs" id="recs"></div>
+    </section>
+
+    <section class="panel">
+      <div class="label">Learning progress</div>
+      <h2>What you can do now</h2>
+      <div class="tiles" id="learning"></div>
+      <h3 class="subh">English analysis skills</h3>
+      <div id="skillprog"></div>
+      <p class="small">These come from your own practice and self-marking. They show progress, not a predicted grade.</p>
+    </section>
+
+    <section class="panel">
+      <div class="label">Exam skills</div>
+      <h2>Five skills every subject needs</h2>
+      <p class="small">Worked out from the questions you've answered. The number in brackets is how many answers it's based on.</p>
+      <div id="skills5"></div>
+    </section>
+
+    <section class="panel">
+      <div class="label">Coverage</div>
+      <h2>What you've practised</h2>
+      <div id="coverage"></div>
+    </section>
+
+    <section class="panel">
+      <div class="label">Where marks go</div>
+      <h2>Why you lose marks</h2>
+      <div id="errtypes"></div>
+    </section>
+
+    <section class="panel">
+      <div class="label">Summary</div>
+      <h2>Your revision so far</h2>
+      <div id="trialsum"></div>
+    </section>
+
+    <section class="panel">
+      <div class="label">Ready to retry</div>
+      <h2>Questions to have another go at</h2>
+      <div id="retries"></div>
+    </section>
+
+    <section class="panel">
+      <div class="label">Topics</div>
+      <h2>How confident do you feel?</h2>
+      <p class="lead">Tap a colour for each topic. <b class="rag-r">Red</b> means you're stuck, <b class="rag-a">amber</b> means you're getting there, <b class="rag-g">green</b> means you've got it. Your quiz and practice answers show next to each topic, separately from how you feel.</p>
       <div class="ragsum" id="ragsum"></div>
       <div class="filter" id="filter"></div>
     </section>
@@ -152,26 +228,30 @@
     <section class="panel">
       <div class="label">Mistake log</div>
       <h2>Every wrong answer goes here</h2>
-      <p class="small">Quiz mistakes are added for you. Add your own from past papers and Sparx.</p>
+      <p class="small">Quiz and practice mistakes are added for you. Add your own from past papers and Sparx, and pick why you lost the marks: it shapes your next steps.</p>
       <div class="tablewrap">
         <table class="log">
-          <thead><tr><th>Date</th><th>Subject</th><th>What I got wrong</th><th>Fixed?</th><th></th></tr></thead>
+          <thead><tr><th>Date</th><th>Subject</th><th>What I got wrong</th><th>Why?</th><th>Fixed?</th><th></th></tr></thead>
           <tbody id="logbody"></tbody>
         </table>
       </div>
       <button class="btn" id="add-log" type="button">Add a mistake</button>
     </section>
 
+    <p class="small" id="activity" style="text-align:center"></p>
+
     <section class="panel">
       <div class="label">Keep your work safe</div>
       <h2>Back up and restore</h2>
-      <p class="small">Your ticks, ratings and notes are saved in this browser only. Download a backup now and then, or to move to another device.</p>
+      <p class="small">Everything is saved in this browser on this device only. Clearing your browser data, using private browsing, or switching device will lose it. Download a backup every few days, and use it to move to another device.</p>
       <div class="row-actions">
         <button class="btn" id="export" type="button">Download backup</button>
         <label class="btn ghost" for="import">Restore from backup</label>
         <input type="file" id="import" accept="application/json" hidden>
+        <button class="btn ghost" id="undo-restore" type="button" hidden>Undo last restore</button>
         <button class="btn ghost" id="reset" type="button">Clear everything</button>
       </div>
+      <div class="confirm" id="restore-confirm" hidden></div>
       <p class="small" id="backup-msg" role="status"></p>
     </section>
   </section>
@@ -193,6 +273,7 @@
 <script src="assets/data.js"></script>
 <script src="assets/quizzes.js"></script>
 <script src="assets/starters.js"></script>
+<script src="assets/coach-data.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>

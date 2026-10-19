@@ -19,3 +19,7 @@ Send that link to Harriet and she can add it to her phone's home screen.
 - **Public repository.** Anyone with the link can see the plan, but not her saved progress, which never leaves her device.
 - **Changing the plan.** Edit `assets/data.js` on GitHub (click the file, then the pencil icon). Each block lists its subject, title, what to do, what to use, and its links.
 - **Adding quiz questions.** Edit `assets/quizzes.js`. Copy an existing question and change the text. `c` is the position of the correct answer, counting from 0.
+
+## Restoring a previous version
+
+The version before the exam coach update is commit `29b349d126`. To roll back, open that commit on GitHub, browse the files and re-upload them, or use `git revert` on the later commits. Harriet's progress lives in her browser, not in this repository, so rolling back the site does not touch her saved work.
